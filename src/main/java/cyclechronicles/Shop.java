@@ -1,11 +1,37 @@
 package cyclechronicles;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.logging.*;
+import java.util.logging.Formatter;
 
 /** A small bike shop. */
 public class Shop {
+
+    // Initialize the Logger
+    static Logger logger = Logger.getLogger(Shop.class.getName());
+
     private final Queue<OrderRecord> pendingOrderRecordClasses = new LinkedList<>();
     private final Set<OrderRecord> completedOrderRecordClasses = new HashSet<>();
+
+    // Initialize the Logger Block
+    static {
+        // Define the file, where we want to write the Data
+        try {
+            FileHandler fileHandler = new FileHandler("log-details.csv", true);
+            fileHandler.setFormatter(new Formatter() {
+                @Override
+                public String format(LogRecord record) {
+                    String log = record.getLevel() + " , " + record.getSourceMethodName() + " , " + record.getSourceClassName() + " , " + record.getMessage() +  System.lineSeparator();
+                    return log;
+                }
+            });
+            logger.addHandler(fileHandler);
+            logger.setUseParentHandlers(false);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Accept a repair order.
@@ -31,6 +57,7 @@ public class Shop {
         if (pendingOrderRecordClasses.stream().anyMatch(x -> x.customer().equals(o.customer())))
             return false;
         if (pendingOrderRecordClasses.size() > 4) return false;
+        logger.logp(Level.INFO,"accept",Shop.class.getName() ,o.customer() + " : " + o.bicycleType() + " : " + "PendingOrderRecords");
 
         return pendingOrderRecordClasses.add(o);
     }
@@ -49,11 +76,13 @@ public class Shop {
         OrderRecord orderRecord = pendingOrderRecordClasses.poll();
 
         if (orderRecord != null){
+            logger.logp(Level.INFO,"repair",Shop.class.getName() ,orderRecord.customer() + " : " + orderRecord.bicycleType() + " : " + "PendingOrderRecords");
             completedOrderRecordClasses.add(orderRecord);
+            logger.logp(Level.INFO,"repair",Shop.class.getName() ,orderRecord.customer() + " : " + orderRecord.bicycleType() + " : " + "CompletedOrderRecords");
             return Optional.of(orderRecord);
         }
-
         return Optional.empty();
+
     }
 
     /**
@@ -70,6 +99,7 @@ public class Shop {
         Optional<OrderRecord> order = completedOrderRecordClasses.stream().filter(o -> o.customer().equals(c)).findAny();
 
         if (order.isPresent()){
+            logger.logp(Level.INFO,"deliver",Shop.class.getName() ,order.get().customer() + " : " + order.get().bicycleType() + " : " + "PendingOrderRecords");
             completedOrderRecordClasses.remove(order.get());
             return order;
         }
