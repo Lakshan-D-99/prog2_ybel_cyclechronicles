@@ -13,11 +13,11 @@ import static org.mockito.Mockito.when;
 class ShopTest {
 
     Shop shop;
-    Order order;
+    OrderRecord orderRecord;
 
     @BeforeEach
     public void setUp(){
-        order = mock(Order.class);
+        orderRecord = mock(OrderRecord.class);
         shop = new Shop();
     }
 
@@ -25,7 +25,7 @@ class ShopTest {
     // Test, if the Pending Order is empty -> by getting an Order and checking if the Order exists or not
     @Test
     public void testShop_CheckIfThePendingListIsEmpty(){
-        Optional<Order> order = shop.repair();
+        Optional<OrderRecord> order = shop.repair();
         assertFalse(order.isPresent());
     }
 
@@ -34,12 +34,12 @@ class ShopTest {
     public void testShop_CheckIfTheOrdersGetAddedToPendingList(){
 
         // First add a new Order
-        when(order.customer()).thenReturn("CustomerOne");
-        when(order.bicycleType()).thenReturn(Type.FIXIE);
-        shop.accept(order);
+        when(orderRecord.customer()).thenReturn("CustomerOne");
+        when(orderRecord.bicycleType()).thenReturn(Type.FIXIE);
+        shop.accept(orderRecord);
 
         // Now get the Order from the Pending List
-        Optional<Order> order = shop.repair();
+        Optional<OrderRecord> order = shop.repair();
         assertTrue(order.isPresent());
     }
 
@@ -48,15 +48,15 @@ class ShopTest {
     public void testShop_CustomerGetTheBikeDelivered(){
 
         // First add a new Order
-        when(order.customer()).thenReturn("CustomerOne");
-        when(order.bicycleType()).thenReturn(Type.FIXIE);
-        shop.accept(order);
+        when(orderRecord.customer()).thenReturn("CustomerOne");
+        when(orderRecord.bicycleType()).thenReturn(Type.FIXIE);
+        shop.accept(orderRecord);
 
         // Now repair the bike
         shop.repair();
 
         // Now get the repaired bike
-        Optional<Order> repairedBike = shop.deliver("CustomerOne");
+        Optional<OrderRecord> repairedBike = shop.deliver("CustomerOne");
         assertTrue(repairedBike.isPresent());
     }
 }
