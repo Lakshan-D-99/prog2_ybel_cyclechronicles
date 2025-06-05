@@ -2,8 +2,6 @@ package cyclechronicles;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 
 import java.util.Optional;
 
@@ -36,8 +34,8 @@ class ShopTest {
     public void testShop_CheckIfTheOrdersGetAddedToPendingList(){
 
         // First add a new Order
-        when(order.getCustomer()).thenReturn("CustomerOne");
-        when(order.getBicycleType()).thenReturn(Type.FIXIE);
+        when(order.customer()).thenReturn("CustomerOne");
+        when(order.bicycleType()).thenReturn(Type.FIXIE);
         shop.accept(order);
 
         // Now get the Order from the Pending List
@@ -50,8 +48,8 @@ class ShopTest {
     public void testShop_CustomerGetTheBikeDelivered(){
 
         // First add a new Order
-        when(order.getCustomer()).thenReturn("CustomerOne");
-        when(order.getBicycleType()).thenReturn(Type.FIXIE);
+        when(order.customer()).thenReturn("CustomerOne");
+        when(order.bicycleType()).thenReturn(Type.FIXIE);
         shop.accept(order);
 
         // Now repair the bike

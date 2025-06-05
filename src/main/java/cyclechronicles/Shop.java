@@ -4,8 +4,8 @@ import java.util.*;
 
 /** A small bike shop. */
 public class Shop {
-    private final Queue<Order> pendingOrders = new LinkedList<>();
-    private final Set<Order> completedOrders = new HashSet<>();
+    private final Queue<Order> pendingOrderClasses = new LinkedList<>();
+    private final Set<Order> completedOrderClasses = new HashSet<>();
 
     /**
      * Accept a repair order.
@@ -26,13 +26,13 @@ public class Shop {
      *     otherwise
      */
     public boolean accept(Order o) {
-        if (o.getBicycleType() == Type.GRAVEL) return false;
-        if (o.getBicycleType() == Type.EBIKE) return false;
-        if (pendingOrders.stream().anyMatch(x -> x.getCustomer().equals(o.getCustomer())))
+        if (o.bicycleType() == Type.GRAVEL) return false;
+        if (o.bicycleType() == Type.EBIKE) return false;
+        if (pendingOrderClasses.stream().anyMatch(x -> x.customer().equals(o.customer())))
             return false;
-        if (pendingOrders.size() > 4) return false;
+        if (pendingOrderClasses.size() > 4) return false;
 
-        return pendingOrders.add(o);
+        return pendingOrderClasses.add(o);
     }
 
     /**
@@ -46,10 +46,10 @@ public class Shop {
     public Optional<Order> repair() {
 
         // Take the oldest pending Order from the Pending List
-        Order order = pendingOrders.poll();
+        Order order = pendingOrderClasses.poll();
 
         if (order != null){
-            completedOrders.add(order);
+            completedOrderClasses.add(order);
             return Optional.of(order);
         }
 
@@ -67,10 +67,10 @@ public class Shop {
      */
     public Optional<Order> deliver(String c) {
 
-        Optional<Order> order = completedOrders.stream().filter(o -> o.getCustomer().equals(c)).findAny();
+        Optional<Order> order = completedOrderClasses.stream().filter(o -> o.customer().equals(c)).findAny();
 
         if (order.isPresent()){
-            completedOrders.remove(order.get());
+            completedOrderClasses.remove(order.get());
             return order;
         }
 
