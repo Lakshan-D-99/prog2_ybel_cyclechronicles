@@ -4,8 +4,8 @@ import java.util.*;
 
 /** A small bike shop. */
 public class Shop {
-    private final Queue<Order> pendingOrders = new LinkedList<>();
-    private final Set<Order> completedOrders = new HashSet<>();
+    private final Queue<OrderRecord> pendingOrderRecordClasses = new LinkedList<>();
+    private final Set<OrderRecord> completedOrderRecordClasses = new HashSet<>();
 
     /**
      * Accept a repair order.
@@ -25,14 +25,14 @@ public class Shop {
      * @return {@code true} if all conditions are met and the order has been accepted, {@code false}
      *     otherwise
      */
-    public boolean accept(Order o) {
-        if (o.getBicycleType() == Type.GRAVEL) return false;
-        if (o.getBicycleType() == Type.EBIKE) return false;
-        if (pendingOrders.stream().anyMatch(x -> x.getCustomer().equals(o.getCustomer())))
+    public boolean accept(OrderRecord o) {
+        if (o.bicycleType() == Type.GRAVEL) return false;
+        if (o.bicycleType() == Type.EBIKE) return false;
+        if (pendingOrderRecordClasses.stream().anyMatch(x -> x.customer().equals(o.customer())))
             return false;
-        if (pendingOrders.size() > 4) return false;
+        if (pendingOrderRecordClasses.size() > 4) return false;
 
-        return pendingOrders.add(o);
+        return pendingOrderRecordClasses.add(o);
     }
 
     /**
@@ -43,8 +43,17 @@ public class Shop {
      *
      * @return finished order
      */
-    public Optional<Order> repair() {
-        throw new UnsupportedOperationException();
+    public Optional<OrderRecord> repair() {
+
+        // Take the oldest pending Order from the Pending List
+        OrderRecord orderRecord = pendingOrderRecordClasses.poll();
+
+        if (orderRecord != null){
+            completedOrderRecordClasses.add(orderRecord);
+            return Optional.of(orderRecord);
+        }
+
+        return Optional.empty();
     }
 
     /**
@@ -56,7 +65,15 @@ public class Shop {
      * @param c search for any completed orders of this customer
      * @return any finished order for given customer, {@code Optional.empty()} if none found
      */
-    public Optional<Order> deliver(String c) {
-        throw new UnsupportedOperationException();
+    public Optional<OrderRecord> deliver(String c) {
+
+        Optional<OrderRecord> order = completedOrderRecordClasses.stream().filter(o -> o.customer().equals(c)).findAny();
+
+        if (order.isPresent()){
+            completedOrderRecordClasses.remove(order.get());
+            return order;
+        }
+
+        return Optional.empty();
     }
 }
