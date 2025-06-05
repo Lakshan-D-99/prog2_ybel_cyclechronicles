@@ -1,11 +1,37 @@
 package cyclechronicles;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.logging.*;
+import java.util.logging.Formatter;
 
 /** A small bike shop. */
 public class Shop {
-    private final Queue<Order> pendingOrders = new LinkedList<>();
-    private final Set<Order> completedOrders = new HashSet<>();
+
+    // Initialize the Logger
+    static Logger logger = Logger.getLogger(Shop.class.getName());
+
+    private final Queue<OrderRecord> pendingOrderRecordClasses = new LinkedList<>();
+    private final Set<OrderRecord> completedOrderRecordClasses = new HashSet<>();
+
+    // Initialize the Logger Block
+    static {
+        // Define the file, where we want to write the Data
+        try {
+            FileHandler fileHandler = new FileHandler("log-details.csv", true);
+            fileHandler.setFormatter(new Formatter() {
+                @Override
+                public String format(LogRecord record) {
+                    String log = record.getLevel() + " , " + record.getSourceMethodName() + " , " + record.getSourceClassName() + " , " + record.getMessage() +  System.lineSeparator();
+                    return log;
+                }
+            });
+            logger.addHandler(fileHandler);
+            logger.setUseParentHandlers(false);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Accept a repair order.
@@ -25,14 +51,15 @@ public class Shop {
      * @return {@code true} if all conditions are met and the order has been accepted, {@code false}
      *     otherwise
      */
-    public boolean accept(Order o) {
-        if (o.getBicycleType() == Type.GRAVEL) return false;
-        if (o.getBicycleType() == Type.EBIKE) return false;
-        if (pendingOrders.stream().anyMatch(x -> x.getCustomer().equals(o.getCustomer())))
+    public boolean accept(OrderRecord o) {
+        if (o.bicycleType() == Type.GRAVEL) return false;
+        if (o.bicycleType() == Type.EBIKE) return false;
+        if (pendingOrderRecordClasses.stream().anyMatch(x -> x.customer().equals(o.customer())))
             return false;
-        if (pendingOrders.size() > 4) return false;
+        if (pendingOrderRecordClasses.size() > 4) return false;
+        logger.logp(Level.INFO,"accept",Shop.class.getName() ,o.customer() + " : " + o.bicycleType() + " : " + "PendingOrderRecords");
 
-        return pendingOrders.add(o);
+        return pendingOrderRecordClasses.add(o);
     }
 
     /**
@@ -43,8 +70,19 @@ public class Shop {
      *
      * @return finished order
      */
-    public Optional<Order> repair() {
-        throw new UnsupportedOperationException();
+    public Optional<OrderRecord> repair() {
+
+        // Take the oldest pending Order from the Pending List
+        OrderRecord orderRecord = pendingOrderRecordClasses.poll();
+
+        if (orderRecord != null){
+            logger.logp(Level.INFO,"repair",Shop.class.getName() ,orderRecord.customer() + " : " + orderRecord.bicycleType() + " : " + "PendingOrderRecords");
+            completedOrderRecordClasses.add(orderRecord);
+            logger.logp(Level.INFO,"repair",Shop.class.getName() ,orderRecord.customer() + " : " + orderRecord.bicycleType() + " : " + "CompletedOrderRecords");
+            return Optional.of(orderRecord);
+        }
+        return Optional.empty();
+
     }
 
     /**
@@ -56,7 +94,16 @@ public class Shop {
      * @param c search for any completed orders of this customer
      * @return any finished order for given customer, {@code Optional.empty()} if none found
      */
-    public Optional<Order> deliver(String c) {
-        throw new UnsupportedOperationException();
+    public Optional<OrderRecord> deliver(String c) {
+
+        Optional<OrderRecord> order = completedOrderRecordClasses.stream().filter(o -> o.customer().equals(c)).findAny();
+
+        if (order.isPresent()){
+            logger.logp(Level.INFO,"deliver",Shop.class.getName() ,order.get().customer() + " : " + order.get().bicycleType() + " : " + "PendingOrderRecords");
+            completedOrderRecordClasses.remove(order.get());
+            return order;
+        }
+
+        return Optional.empty();
     }
 }
