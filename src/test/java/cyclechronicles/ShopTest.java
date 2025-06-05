@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -21,44 +23,42 @@ class ShopTest {
         shop = new Shop();
     }
 
-    // Add a new Order into the Pending List
+
+    // Test, if the Pending Order is empty -> by getting an Order and checking if the Order exists or not
     @Test
-    public void testShop_AddNewOrderIntoPendingList(){
-        when(order.getCustomer()).thenReturn("Customer Name");
+    public void testShop_CheckIfThePendingListIsEmpty(){
+        Optional<Order> order = shop.repair();
+        assertFalse(order.isPresent());
+    }
+
+    // Test, if the Orders get added into the Pending List
+    @Test
+    public void testShop_CheckIfTheOrdersGetAddedToPendingList(){
+
+        // First add a new Order
+        when(order.getCustomer()).thenReturn("CustomerOne");
         when(order.getBicycleType()).thenReturn(Type.FIXIE);
+        shop.accept(order);
 
-        assertTrue(shop.accept(order));
+        // Now get the Order from the Pending List
+        Optional<Order> order = shop.repair();
+        assertTrue(order.isPresent());
     }
 
-    // Test if an existing Customer can add a new Order
+    // Test, if a specific Customer will get his bike delivered, by calling the delivered method with the customer name.
     @Test
-    public void testShop_CanExistingCustomerAddAnotherOrder(){
+    public void testShop_CustomerGetTheBikeDelivered(){
 
-        when(order.getCustomer()).thenReturn("Customer Name");
+        // First add a new Order
+        when(order.getCustomer()).thenReturn("CustomerOne");
         when(order.getBicycleType()).thenReturn(Type.FIXIE);
+        shop.accept(order);
 
-        assertTrue(shop.accept(order));
+        // Now repair the bike
+        shop.repair();
 
-        when(order.getCustomer()).thenReturn("Customer Name");
-        when(order.getBicycleType()).thenReturn(Type.RACE);
-
-        assertFalse(shop.accept(order));
+        // Now get the repaired bike
+        Optional<Order> repairedBike = shop.deliver("CustomerOne");
+        assertTrue(repairedBike.isPresent());
     }
-
-    // Test, that a customer can not add a Gravel or an Ebike
-    @Test
-    public void testShop_CustomerNotAllowedToAddGravelBike(){
-        when(order.getCustomer()).thenReturn("Customer One");
-        when(order.getBicycleType()).thenReturn(Type.GRAVEL);
-        assertFalse(shop.accept(order));
-    }
-
-    // Test, that a customer can not add a Gravel or an Ebike
-    @Test
-    public void testShop_CustomerNotAllowedToAddEBike(){
-        when(order.getCustomer()).thenReturn("Customer One");
-        when(order.getBicycleType()).thenReturn(Type.EBIKE);
-        assertFalse(shop.accept(order));
-    }
-
 }

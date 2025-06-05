@@ -44,7 +44,16 @@ public class Shop {
      * @return finished order
      */
     public Optional<Order> repair() {
-        throw new UnsupportedOperationException();
+
+        // Take the oldest pending Order from the Pending List
+        Order order = pendingOrders.poll();
+
+        if (order != null){
+            completedOrders.add(order);
+            return Optional.of(order);
+        }
+
+        return Optional.empty();
     }
 
     /**
@@ -57,6 +66,14 @@ public class Shop {
      * @return any finished order for given customer, {@code Optional.empty()} if none found
      */
     public Optional<Order> deliver(String c) {
-        throw new UnsupportedOperationException();
+
+        Optional<Order> order = completedOrders.stream().filter(o -> o.getCustomer().equals(c)).findAny();
+
+        if (order.isPresent()){
+            completedOrders.remove(order.get());
+            return order;
+        }
+
+        return Optional.empty();
     }
 }
